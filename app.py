@@ -1,20 +1,19 @@
 from flask import Flask, render_template, request, jsonify
-from flask_mysqldb import MySQL
+import psycopg2
 
-mysql = MySQL()
 app = Flask(__name__)
 
-#app.template_folder = "templates" 
+# Conexão com o banco de dados PostgreSQL
+db_connection = psycopg2.connect(
+    host="localhost",  # O endereço do contêiner Docker do banco de dados
+    database="tarot_db",  # O nome do banco de dados
+    user="tarot_user",  # O usuário do banco de dados
+    password="tarot_password"  # A senha do usuário do banco de dados
+)
 
-app.config['MYSQL_HOST'] = '172.19.0.3'  # Altere para o endereço IP correto
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'tarot_password'
-app.config['MYSQL_DB'] = 'tarot_db'
-
-mysql.init_app(app)
+db_cursor = db_connection.cursor()
 
 @app.route('/')
-
 def index():
     return render_template('index.html')
 
@@ -23,47 +22,58 @@ def cadastrar():
     nome = request.form.get('name')
     email = request.form.get('email')
 
-    conn = mysql.connect()
-    cursor = conn.cursor()
+    # Inserir o usuário no banco de dados
+    inserir_usuario(nome, email)
 
-    try:
-        cursor.execute("INSERT INTO users (nome, email) VALUES (%s, %s)", (nome, email))  # Alterado para 'nome'
-        conn.commit()
-        mensagem = f'Boas-vindas, {nome}! Seu cadastro foi realizado com sucesso.'
-    except Exception as e:
-        conn.rollback()
-        mensagem = f'Erro ao cadastrar usuário: {str(e)}'
-    finally:
-        cursor.close()
-        conn.close()
+    mensagem = f'Boas-vindas, {nome}! Seu cadastro foi realizado com sucesso.'
 
     return jsonify({"mensagem": mensagem})
 
+def inserir_usuario(nome, email):
+    insert_query = "INSERT INTO users (name, email) VALUES (%s, %s)"
+    db_cursor.execute(insert_query, (nome, email))
+    db_connection.commit()
+
 @app.route('/listar', methods=['GET'])
 def listar():
-    conn = mysql.connect()
-    cursor = conn.cursor()
+    # Conectar ao banco de dados
+    db_connection = psycopg2.connect(
+        host="localhost",
+        database="tarot_db",
+        user="tarot_user",
+        password="tarot_password"
+    )
+
+    # Criar um cursor para executar consultas SQL
+    db_cursor = db_connection.cursor()
 
     try:
-        cursor.execute("SELECT * FROM users")
-        resultados = cursor.fetchall()
+        # Executar uma consulta SQL para obter os dados que você deseja listar
+        db_cursor.execute("SELECT * FROM users")
+        
+        # Buscar todos os resultados da consulta
+        resultados = db_cursor.fetchall()
+        
+        # Criar uma lista para armazenar os resultados
         lista_usuarios = []
 
+        # Estruturar os resultados em um formato adequado (por exemplo, uma lista de dicionários)
         for resultado in resultados:
             usuario = {
                 'id': resultado[0],
-                'nome': resultado[1],  # Alterado para 'nome'
+                'nome': resultado[1],
                 'email': resultado[2]
             }
             lista_usuarios.append(usuario)
 
+        # Retornar os dados em formato JSON
+        return jsonify({"usuarios": lista_usuarios})
     except Exception as e:
-        mensagem = f'Erro ao listar usuários: {str(e)}'
+        return jsonify({"erro": str(e)})
     finally:
-        cursor.close()
-        conn.close()
-
-    return jsonify({"usuarios": lista_usuarios})
+        # Fechar o cursor e a conexão com o banco de dados
+        db_cursor.close()
+        db_connection.close()
 
 if __name__ == "__main__":
     app.run(debug=True)
