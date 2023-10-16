@@ -1,28 +1,46 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("user-form");
-    const cadastroBtn = document.getElementById("cadastro-btn");
-    const mensagem = document.getElementById("mensagem");
+    const salvarBtn = document.getElementById("salvar-dados-btn");
+    const gerarCartaBtn = document.getElementById("gerar-carta-btn");
 
-    cadastroBtn.addEventListener("click", async function () {
-        const formData = new FormData(form);
+    salvarBtn.addEventListener("click", async function () {
+        const formData = new FormData(document.getElementById("user-form"));
 
-        // Enviar dados do usuário ao servidor para cadastro
-        const response = await fetch("/cadastro", {
+        // Enviar dados do usuário ao servidor para salvar
+        const response = await fetch("/salvar_dados", {
             method: "POST",
             body: formData,
         });
 
         if (response.ok) {
+            alert("Dados salvos com sucesso!");
+        } else {
+            alert("Erro ao salvar os dados. Tente novamente.");
+        }
+    });
+
+    gerarCartaBtn.addEventListener("click", async function () {
+        // Solicitar ao servidor para escolher uma carta
+        const response = await fetch("/escolher_carta", {
+            method: "POST",
+        });
+
+        if (response.ok) {
             const data = await response.json();
 
-            // Exibir a mensagem de boas-vindas
-            mensagem.innerHTML = data.mensagem;
-            mensagem.style.display = "block";
+            // Exibir a carta escolhida e seu significado
+            const cartaNome = document.getElementById("carta-nome");
+            const cartaSignificado = document.getElementById("carta-significado");
+            cartaNome.textContent = data.carta;
+            cartaSignificado.textContent = data.significado;
 
-            // Esconder o formulário
-            form.style.display = "none";
+            // Exibir o resultado
+            const cartaResult = document.getElementById("carta-result");
+            cartaResult.style.display = "block";
+
+            // Esconder o botão "Gerar Carta"
+            gerarCartaBtn.style.display = "none";
         } else {
-            alert("Erro ao cadastrar. Tente novamente.");
+            alert("Erro ao escolher a carta. Tente novamente.");
         }
     });
 });

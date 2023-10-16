@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import psycopg2
+import random
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 # Conexão com o banco de dados PostgreSQL
 db_connection = psycopg2.connect(
@@ -12,6 +13,8 @@ db_connection = psycopg2.connect(
 )
 
 db_cursor = db_connection.cursor()
+
+tarot_cards = [{"id": i, "card_name": f"Carta {i}"} for i in range(1, 37)]
 
 @app.route('/')
 def index():
@@ -36,24 +39,13 @@ def inserir_usuario(nome, email):
 
 @app.route('/listar', methods=['GET'])
 def listar():
-    # Conectar ao banco de dados
-    db_connection = psycopg2.connect(
-        host="localhost",
-        database="tarot_db",
-        user="tarot_user",
-        password="tarot_password"
-    )
-
-    # Criar um cursor para executar consultas SQL
-    db_cursor = db_connection.cursor()
-
     try:
         # Executar uma consulta SQL para obter os dados que você deseja listar
         db_cursor.execute("SELECT * FROM users")
-        
+
         # Buscar todos os resultados da consulta
         resultados = db_cursor.fetchall()
-        
+
         # Criar uma lista para armazenar os resultados
         lista_usuarios = []
 
@@ -74,6 +66,31 @@ def listar():
         # Fechar o cursor e a conexão com o banco de dados
         db_cursor.close()
         db_connection.close()
+
+@app.route('/embaralhar', methods=['GET'])
+def embaralhar_cartas():
+    try:
+        # Embaralhar as cartas
+        random.shuffle(tarot_cards)
+
+        # Limpar a tabela 'tarot_shuffled_order' antes de inserir as cartas embaralhadas
+        clear_table_query = "DELETE FROM tarot_shuffled_order"
+        db_cursor.execute(clear_table_query)
+        
+        # Inserir as cartas embaralhadas na tabela 'tarot_shuffled_order'
+        for index, carta in enumerate(tarot_cards):
+            insert_query = "INSERT INTO tarot_shuffled_order (card_id, order_position) VALUES (%s, %s)"
+            db_cursor.execute(insert_query, (carta["id"], index))
+        
+        db_connection.commit()
+
+        # Retornar a ordem embaralhada das cartas como JSON
+        return jsonify({"cartas_embaralhadas": tarot_cards})
+    except Exception as e:
+        return jsonify({"erro": str(e)})
+
+    # Retornar a ordem embaralhada das cartas como JSON
+    return jsonify({"cartas_embaralhadas": tarot_cards})
 
 if __name__ == "__main__":
     app.run(debug=True)

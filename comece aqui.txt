@@ -1,0 +1,5 @@
+considerando que não tenha nenhum conteiner em Docker, ja no diretorio onde esta a pasta tarot3, executar o comando docker compose up para criar os conteineres.
+
+Além disso, se certificar qque o Postgree esteja instalado na sua maquina e que esta em execução. 
+
+Após criacção os conteineres: python app.py para executar o programa

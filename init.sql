@@ -7,11 +7,9 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL
 );
 
--- Criação da tabela 'chosen_cards'
-CREATE TABLE IF NOT EXISTS chosen_cards (
+CREATE TABLE tarot_shuffled_order (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    card_name TEXT NOT NULL
+    card_id INT,
+    order_position INT
 );
 
--- Outras tabelas ou comandos SQL podem ser adicionados aqui, se necessário
