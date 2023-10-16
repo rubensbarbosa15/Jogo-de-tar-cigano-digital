@@ -1,5 +1,6 @@
-Aplicativo de Cadastro e Listagem de Usuários para Jogo de Tarô
-Este é um aplicativo simples para cadastrar e listar usuários para um jogo de tarô. Ele usa Flask como framework web e PostgreSQL como banco de dados.
+# Jogo de Tarô
+
+Este é um aplicativo de exemplo que permite cadastrar usuários e embaralhar
 
 Configuração do Ambiente
 Certifique-se de que você tenha Python e Docker instalados em seu sistema. Além disso, verifique se o Docker Compose está disponível.
@@ -50,8 +51,13 @@ O aplicativo possui duas rotas principais:
 /: Página inicial com um formulário de cadastro de usuário.
 /listar: Página que lista todos os usuários cadastrados.
 Para cadastrar um usuário, preencha o formulário na página inicial. Após o cadastro, você verá uma mensagem de boas-vindas e o usuário será adicionado ao banco de dados.
+/embaralhar: Página que permite embaralhar as cartas do tarô e exibir a ordem embaralhada.
 
+Cadastro de Usuário
+Para cadastrar um usuário, preencha o formulário na página inicial. Após o cadastro, você verá uma mensagem de boas-vindas, e o usuário será adicionado ao banco de dados.
+
+Listagem de Usuários
 Na página de listagem, você pode visualizar todos os usuários cadastrados.
 
-Contribuição
-Sinta-se à vontade para contribuir com este projeto, reportar problemas ou sugerir melhorias.
+Embaralhamento de Cartas
+Na página de embaralhamento, você pode clicar no botão "Embaralhar" para embaralhar as cartas do tarô. A ordem embaralhada das cartas será exibida na página.
